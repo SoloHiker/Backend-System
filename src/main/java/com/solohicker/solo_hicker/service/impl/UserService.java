@@ -1,10 +1,12 @@
 package com.solohicker.solo_hicker.service.impl;
 
-import com.solohicker.solo_hicker.dto.RegisterDto;
+import com.solohicker.solo_hicker.dto.request.UserLoginDto;
+import com.solohicker.solo_hicker.dto.request.UserRegisterDto;
 import com.solohicker.solo_hicker.entity.User;
 import com.solohicker.solo_hicker.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -16,13 +18,22 @@ public class UserService implements com.solohicker.solo_hicker.service.UserServi
     }
 
     @Override
-    public void register(RegisterDto registerDto) {
+    public void register(UserRegisterDto dto) {
         User newUser = new User(
                 UUID.randomUUID().toString(),
-                registerDto.getUsername(),
-                registerDto.getPassword()
+                dto.getUsername(),
+                dto.getPassword()
         );
 
         userRepository.save(newUser);
+    }
+
+    @Override
+    public String login(UserLoginDto dto) {
+        var selectedUser = userRepository.findByUsername(dto.getUsername());
+
+        if(!Objects.isNull(selectedUser))
+            return "success";
+        return "failure";
     }
 }

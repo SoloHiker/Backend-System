@@ -21,7 +21,10 @@ public class WebSecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        request -> request.anyRequest().authenticated()
+                        request -> request
+                                .requestMatchers("/api/v1/users/register")
+                                .permitAll()
+                                .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());

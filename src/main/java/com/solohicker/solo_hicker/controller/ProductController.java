@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private record Product(Integer productId,
