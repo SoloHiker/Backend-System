@@ -1,16 +1,19 @@
 package com.solohicker.solo_hicker.jwt;
 
 import com.solohicker.solo_hicker.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -43,4 +46,35 @@ public class JwtService {
         return Keys.hmacShaKeyFor(decode);
     }
 
+    public String extractUsername(String jwt) {
+        return extractClaims(jwt, Claims::getSubject);
+    }
+
+    private <T> T extractClaims(String jwt, Function<Claims, T> claimresolver) {
+        Claims claims = extractClaims(jwt);
+        return claimresolver.apply(claims);
+    }
+
+    private Claims extractClaims(String jwt){
+        return Jwts
+                .parser()
+                .verifyWith(generateKey())
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload();
+    }
+
+    public boolean isTokenValid(String jwt, UserDetails userDetails) {
+        final String username = extractUsername(jwt);
+
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(jwt));
+    }
+
+    private boolean isTokenExpired(String jwt) {
+        return extractExpiration(jwt).before(new Date());
+    }
+
+    private Date extractExpiration(String jwt) {
+        return extractClaims(jwt, Claims::getExpiration);
+    }
 }
